@@ -4,4 +4,5 @@
 
 int main(){
 	weighted_graph<int> g;
+	std::cout << "not working";
 }
