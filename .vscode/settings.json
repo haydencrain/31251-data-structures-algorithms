@@ -1,0 +1,7 @@
+{
+	"files.associations": {
+		"*.js": "javascriptreact",
+		"list": "cpp",
+		"unordered_set": "cpp"
+	}
+}

@@ -18,9 +18,10 @@
 #include <deque>
 #include <map>
 
+
+
 template <typename vertex>
-class weighted_graph
-{
+class weighted_graph {
 
 private:
 	std::vector<std::vector<int> > adj_matrix;
@@ -36,47 +37,47 @@ private:
 	//not too comfortable with C++ leave this for last.
 	//If you are, there are many ways of doing this,
 	//as long as it passes the tests, it's okay.
-	class graph_iterator
-	{
-
-	private:
+	class graph_iterator {
+		
+		private:
+		
 		//You may need data members here.
-
-	public:
-		graph_iterator(const weighted_graph &);
-		graph_iterator(const weighted_graph &, size_t);
-		~graph_iterator();
-		graph_iterator operator=(const graph_iterator &);
-		bool operator==(const graph_iterator &) const;
-		bool operator!=(const graph_iterator &) const;
-		graph_iterator operator++();
-		graph_iterator operator++(int);
-		const vertex operator*();
-		const vertex *operator->();
+				
+		public:
+			graph_iterator(const weighted_graph &);
+			graph_iterator(const weighted_graph &, size_t);
+			~graph_iterator();
+			graph_iterator operator=(const graph_iterator&);
+			bool operator==(const graph_iterator&) const;
+			bool operator!=(const graph_iterator&) const;
+			graph_iterator operator++();
+			graph_iterator operator++(int);
+			const vertex operator*();
+			const vertex* operator->();
 	};
-
+	
 	//The neighbour_iterator class provides an iterator
 	//over the neighbours of a given vertex. This is
 	//probably harder (conceptually) than the graph_iterator.
 	//Unless you know how iterators work.
-	class neighbour_iterator
-	{
-
-	private:
+	class neighbour_iterator {
+			
+		private:
+		
 		//You may need data members here.
-
-	public:
-		neighbour_iterator(const neighbour_iterator &);
-		neighbour_iterator(const weighted_graph &, const vertex &);
-		neighbour_iterator(const weighted_graph &, const vertex &, size_t);
-		~neighbour_iterator();
-		neighbour_iterator operator=(const neighbour_iterator &it);
-		bool operator==(const neighbour_iterator &) const;
-		bool operator!=(const neighbour_iterator &) const;
-		neighbour_iterator operator++();
-		neighbour_iterator operator++(int);
-		const std::pair<vertex, int> operator*();
-		const std::pair<const vertex, int> *operator->();
+				
+		public:
+			neighbour_iterator(const neighbour_iterator&);
+			neighbour_iterator(const weighted_graph &, const vertex&);
+			neighbour_iterator(const weighted_graph &, const vertex&, size_t);
+			~neighbour_iterator();
+			neighbour_iterator operator=(const neighbour_iterator& it);
+			bool operator==(const neighbour_iterator&) const;
+			bool operator!=(const neighbour_iterator&) const;
+			neighbour_iterator operator++();
+			neighbour_iterator operator++(int);			
+			const std::pair<vertex, int> operator*();
+			const std::pair<const vertex, int>* operator->();
 	};
 
 public:
@@ -111,21 +112,22 @@ public:
 	std::vector<vertex> get_neighbours(const vertex &); //Returns a vector containing the neighbours of the given vertex.
 
 	graph_iterator begin(); //Returns a graph_iterator pointing to the start of the vertex set.
-	graph_iterator end();		//Returns a graph_iterator pointing to one-past-the-end of the vertex set.
+	graph_iterator end(); //Returns a graph_iterator pointing to one-past-the-end of the vertex set.
+	
+	neighbour_iterator neighbours_begin(const vertex&); //Returns a neighbour_iterator pointing to the start
+														//of the neighbour set for the given vertex.
+	neighbour_iterator neighbours_end(const vertex&); //Returns a neighbour_iterator pointing to one-past-the-end
+													  //of the neighbour set for the given vertex.
 
-	neighbour_iterator neighbours_begin(const vertex &); //Returns a neighbour_iterator pointing to the start
-																											 //of the neighbour set for the given vertex.
-	neighbour_iterator neighbours_end(const vertex &);	 //Returns a neighbour_iterator pointing to one-past-the-end
-																											 //of the neighbour set for the given vertex.
-
-	std::vector<vertex> depth_first(const vertex &);	 //Returns the vertices of the graph in the order they
-																										 //are visited in by a depth-first traversal starting at
-																										 //the given vertex.
-	std::vector<vertex> breadth_first(const vertex &); //Returns the vertices of the graph in the order they
-																										 //are visisted in by a breadth-first traversal starting
-																										 //at the given vertex.
-
+	std::vector<vertex> depth_first(const vertex&); //Returns the vertices of the graph in the order they
+													//are visited in by a depth-first traversal starting at
+													//the given vertex.
+	std::vector<vertex> breadth_first(const vertex&); //Returns the vertices of the graph in the order they
+													  //are visisted in by a breadth-first traversal starting
+													  //at the given vertex.
+	
 	weighted_graph<vertex> mst(); //Returns a minimum spanning tree of the graph.
+	
 };
 
 //Define all your methods down here (or move them up into the header, but be careful you don't double up).
@@ -133,157 +135,116 @@ public:
 //method headers. Note also that C++ is sensitive to the order you declare and define things in - you
 //have to have it available before you use it.
 
+
 /********************************************************************************************************************************************************************
 																GRAPH ITERATOR
 *********************************************************************************************************************************************************************/
 
-template <typename vertex>
-weighted_graph<vertex>::graph_iterator::graph_iterator(const weighted_graph &g)
-{
+template <typename vertex> weighted_graph<vertex>::graph_iterator::graph_iterator(const weighted_graph & g) {
+
 }
 
-template <typename vertex>
-weighted_graph<vertex>::graph_iterator::graph_iterator(const weighted_graph &g, size_t start_pos)
-{
+template <typename vertex> weighted_graph<vertex>::graph_iterator::graph_iterator(const weighted_graph & g, size_t start_pos) {
+		
 }
 
-template <typename vertex>
-weighted_graph<vertex>::graph_iterator::~graph_iterator()
-{
+template <typename vertex> weighted_graph<vertex>::graph_iterator::~graph_iterator() {
+		
 }
 
-template <typename vertex>
-typename weighted_graph<vertex>::graph_iterator weighted_graph<vertex>::graph_iterator::operator=(const graph_iterator &it)
-{
-	auto g = graph_iterator(weighted_graph<vertex>());
-	return g;
+template <typename vertex> typename weighted_graph<vertex>::graph_iterator weighted_graph<vertex>::graph_iterator::operator=(const graph_iterator& it) { 
+		auto g = graph_iterator(weighted_graph<vertex>()); 
+		return g; 
 }
 
-template <typename vertex>
-bool weighted_graph<vertex>::graph_iterator::operator==(const graph_iterator &it) const
-{
-	return false;
+template <typename vertex> bool weighted_graph<vertex>::graph_iterator::operator==(const graph_iterator& it) const { 
+		return false; 
 }
 
-template <typename vertex>
-bool weighted_graph<vertex>::graph_iterator::operator!=(const graph_iterator &it) const
-{
-	return false;
+template <typename vertex> bool weighted_graph<vertex>::graph_iterator::operator!=(const graph_iterator& it) const { 
+		return false; 
 }
 
-template <typename vertex>
-typename weighted_graph<vertex>::graph_iterator weighted_graph<vertex>::graph_iterator::operator++()
-{
-	auto g = graph_iterator(weighted_graph<vertex>());
-	return g;
+template <typename vertex> typename weighted_graph<vertex>::graph_iterator weighted_graph<vertex>::graph_iterator::operator++() { 
+		auto g = graph_iterator(weighted_graph<vertex>()); 
+		return g; 
 }
 
-template <typename vertex>
-typename weighted_graph<vertex>::graph_iterator weighted_graph<vertex>::graph_iterator::operator++(int)
-{
-	auto g = graph_iterator(weighted_graph<vertex>());
-	return g;
+template <typename vertex> typename weighted_graph<vertex>::graph_iterator weighted_graph<vertex>::graph_iterator::operator++(int) { 
+		auto g = graph_iterator(weighted_graph<vertex>()); 
+		return g; 
 }
 
-template <typename vertex>
-const vertex weighted_graph<vertex>::graph_iterator::operator*()
-{
-	auto v = vertex();
-	return v;
+template <typename vertex> const vertex weighted_graph<vertex>::graph_iterator::operator*() { 
+		auto v = vertex(); return v; 
 }
 
-template <typename vertex>
-const vertex *weighted_graph<vertex>::graph_iterator::operator->()
-{
-	return nullptr;
+template <typename vertex> const vertex* weighted_graph<vertex>::graph_iterator::operator->() { 
+		return nullptr; 
 }
+
 
 /********************************************************************************************************************************************************************
 																NEIGHBOUR ITERATOR
 *********************************************************************************************************************************************************************/
 
-template <typename vertex>
-weighted_graph<vertex>::neighbour_iterator::neighbour_iterator(const weighted_graph &g, const vertex &u)
-{
+template <typename vertex> weighted_graph<vertex>::neighbour_iterator::neighbour_iterator(const weighted_graph & g, const vertex& u) {
+		
 }
 
-template <typename vertex>
-weighted_graph<vertex>::neighbour_iterator::neighbour_iterator(const weighted_graph &g, const vertex &u, size_t start_pos)
-{
+template <typename vertex> weighted_graph<vertex>::neighbour_iterator::neighbour_iterator(const weighted_graph & g, const vertex& u, size_t start_pos) {
+		
 }
 
-template <typename vertex>
-weighted_graph<vertex>::neighbour_iterator::~neighbour_iterator()
-{
+template <typename vertex> weighted_graph<vertex>::neighbour_iterator::~neighbour_iterator() {
+		
 }
 
-template <typename vertex>
-typename weighted_graph<vertex>::neighbour_iterator weighted_graph<vertex>::neighbour_iterator::operator=(const neighbour_iterator &it)
-{
-	auto n = neighbour_iterator(weighted_graph<vertex>(), vertex());
-	return n;
+template <typename vertex> typename weighted_graph<vertex>::neighbour_iterator weighted_graph<vertex>::neighbour_iterator::operator=(const neighbour_iterator& it) { 
+		auto n = neighbour_iterator(weighted_graph<vertex>(), vertex()); 
+		return n; 
 }
 
-template <typename vertex>
-bool weighted_graph<vertex>::neighbour_iterator::operator==(const neighbour_iterator &it) const
-{
-	return false;
+template <typename vertex> bool weighted_graph<vertex>::neighbour_iterator::operator==(const neighbour_iterator& it) const { 
+		return false; 
 }
 
-template <typename vertex>
-bool weighted_graph<vertex>::neighbour_iterator::operator!=(const neighbour_iterator &it) const
-{
-	return false;
+template <typename vertex> bool weighted_graph<vertex>::neighbour_iterator::operator!=(const neighbour_iterator& it) const { 
+		return false; 
 }
 
-template <typename vertex>
-typename weighted_graph<vertex>::neighbour_iterator weighted_graph<vertex>::neighbour_iterator::operator++()
-{
-	auto n = neighbour_iterator(weighted_graph<vertex>(), vertex());
-	return n;
+template <typename vertex> typename weighted_graph<vertex>::neighbour_iterator weighted_graph<vertex>::neighbour_iterator::operator++() { 
+		auto n = neighbour_iterator(weighted_graph<vertex>(), vertex()); 
+		return n; 
 }
 
-template <typename vertex>
-typename weighted_graph<vertex>::neighbour_iterator weighted_graph<vertex>::neighbour_iterator::operator++(int)
-{
-	auto n = neighbour_iterator(weighted_graph<vertex>(), vertex());
-	return n;
+template <typename vertex> typename weighted_graph<vertex>::neighbour_iterator weighted_graph<vertex>::neighbour_iterator::operator++(int) { 
+		auto n = neighbour_iterator(weighted_graph<vertex>(), vertex()); 
+		return n; 
 }
 
-template <typename vertex>
-const std::pair<vertex, int> weighted_graph<vertex>::neighbour_iterator::operator*()
-{
-	auto p = std::pair<vertex, int>();
-	return p;
+template <typename vertex> const std::pair<vertex, int> weighted_graph<vertex>::neighbour_iterator::operator*() { 
+		auto p = std::pair<vertex,int>(); 
+		return p; 
 }
 
-template <typename vertex>
-const std::pair<const vertex, int> *weighted_graph<vertex>::neighbour_iterator::operator->()
-{
-	return nullptr;
+template <typename vertex> const std::pair<const vertex, int>* weighted_graph<vertex>::neighbour_iterator::operator->() { 
+		return nullptr; 
 }
 
-template <typename vertex>
-typename weighted_graph<vertex>::graph_iterator weighted_graph<vertex>::begin()
-{
+template <typename vertex>	typename weighted_graph<vertex>::graph_iterator weighted_graph<vertex>::begin() {
 	return graph_iterator(weighted_graph<vertex>());
 }
 
-template <typename vertex>
-typename weighted_graph<vertex>::graph_iterator weighted_graph<vertex>::end()
-{
+template <typename vertex>	typename weighted_graph<vertex>::graph_iterator weighted_graph<vertex>::end() {
 	return graph_iterator(weighted_graph<vertex>());
 }
-
-template <typename vertex>
-typename weighted_graph<vertex>::neighbour_iterator weighted_graph<vertex>::neighbours_begin(const vertex &u)
-{
+	
+template <typename vertex>	typename weighted_graph<vertex>::neighbour_iterator weighted_graph<vertex>::neighbours_begin(const vertex& u) {
 	return neighbour_iterator(*this, vertex());
 }
 
-template <typename vertex>
-typename weighted_graph<vertex>::neighbour_iterator weighted_graph<vertex>::neighbours_end(const vertex &u)
-{
+template <typename vertex>	typename weighted_graph<vertex>::neighbour_iterator weighted_graph<vertex>::neighbours_end(const vertex& u) {
 	return neighbour_iterator(weighted_graph<vertex>(), vertex());
 }
 
@@ -324,9 +285,8 @@ weighted_graph<vertex>::weighted_graph()
 	edges_count = 0;
 }
 
-template <typename vertex>
-weighted_graph<vertex>::~weighted_graph()
-{
+template <typename vertex> weighted_graph<vertex>::~weighted_graph(){
+	
 }
 
 template <typename vertex>
@@ -453,15 +413,11 @@ int weighted_graph<vertex>::get_edge_weight(const vertex &u, const vertex &v) co
 		return -1; // if vertices don't exist, return error flag
 }
 
-template <typename vertex>
-int weighted_graph<vertex>::degree(const vertex &u) const
-{
+template <typename vertex> int weighted_graph<vertex>::degree(const vertex& u) const {
 	return 0;
 }
 
-template <typename vertex>
-int weighted_graph<vertex>::weighted_degree(const vertex &u)
-{
+template <typename vertex> int weighted_graph<vertex>::weighted_degree(const vertex& u) {
 	return 0;
 }
 
@@ -477,9 +433,7 @@ int weighted_graph<vertex>::num_edges() const
 	return edges_count;
 }
 
-template <typename vertex>
-int weighted_graph<vertex>::total_weight()
-{
+template <typename vertex> int weighted_graph<vertex>::total_weight() {
 	return 0;
 }
 
@@ -489,28 +443,21 @@ std::vector<vertex> weighted_graph<vertex>::get_vertices()
 	return vertices;
 }
 
-template <typename vertex>
-std::vector<vertex> weighted_graph<vertex>::get_neighbours(const vertex &u)
-{
+template <typename vertex>	std::vector<vertex> weighted_graph<vertex>::get_neighbours(const vertex& u) {
 	return std::vector<vertex>();
 }
 
-template <typename vertex>
-std::vector<vertex> weighted_graph<vertex>::depth_first(const vertex &start_vertex)
-{
+template <typename vertex> std::vector<vertex> weighted_graph<vertex>::depth_first(const vertex& start_vertex){
 	return std::vector<vertex>();
 }
 
-template <typename vertex>
-std::vector<vertex> weighted_graph<vertex>::breadth_first(const vertex &start_vertex)
-{
+template <typename vertex> std::vector<vertex> weighted_graph<vertex>::breadth_first(const vertex& start_vertex){
 	return std::vector<vertex>();
 }
-
-template <typename vertex>
-weighted_graph<vertex> weighted_graph<vertex>::mst()
-{
+	
+template <typename vertex>	weighted_graph<vertex> weighted_graph<vertex>::mst() {
 	return weighted_graph<vertex>();
 }
+
 
 #endif
