@@ -2,8 +2,7 @@
 #include <vector>
 #include "weighted_graph.hpp"
 
-int main()
-{
+int main(){
 	weighted_graph<int> g;
 	int r = 5;
 	for (int i = 0; i < r; ++i)
@@ -18,3 +17,5 @@ int main()
 	g.add_edge(0, 4, 5);
 	g.print();
 }
+
+
