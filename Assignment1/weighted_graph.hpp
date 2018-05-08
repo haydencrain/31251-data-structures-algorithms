@@ -21,8 +21,7 @@
 template <typename vertex>
 class weighted_graph {
 
-	private:
-	
+private:
 	std::vector<std::vector<int> > adj_matrix;
 	std::vector<vertex> vertices;
 	int edges_count;
@@ -30,6 +29,22 @@ class weighted_graph {
 	
 	int get_index(const vertex&) const;
 	bool index_are_valid(const int&, const int&) const;
+	
+	struct edge {
+		int u_index, v_index, weight;
+	};
+	
+	void sort_edges(std::vector<edge>&);
+	
+	class disjoint_set {
+	private:
+		std::unordered_map<int, int> parent;
+		
+	public:
+		void make_set(int); 
+		int find(int);
+		void make_union(int, int);
+	};
 	
 	//The graph_iterator class provides an iterator
 	//over the vertices of the graph.
@@ -39,21 +54,21 @@ class weighted_graph {
 	//as long as it passes the tests, it's okay.
 	class graph_iterator {
 		
-		private:
+	private:
 		
-		//You may need data members here.
+	//You may need data members here.
 				
-		public:
-			graph_iterator(const weighted_graph &);
-			graph_iterator(const weighted_graph &, size_t);
-			~graph_iterator();
-			graph_iterator operator=(const graph_iterator&);
-			bool operator==(const graph_iterator&) const;
-			bool operator!=(const graph_iterator&) const;
-			graph_iterator operator++();
-			graph_iterator operator++(int);
-			const vertex operator*();
-			const vertex* operator->();
+	public:
+		graph_iterator(const weighted_graph &);
+		graph_iterator(const weighted_graph &, size_t);
+		~graph_iterator();
+		graph_iterator operator=(const graph_iterator&);
+		bool operator==(const graph_iterator&) const;
+		bool operator!=(const graph_iterator&) const;
+		graph_iterator operator++();
+		graph_iterator operator++(int);
+		const vertex operator*();
+		const vertex* operator->();
 	};
 	
 	//The neighbour_iterator class provides an iterator
@@ -139,9 +154,9 @@ class weighted_graph {
 //have to have it available before you use it.
 
 
-/********************************************************************************************************************************************************************
-																GRAPH ITERATOR
-*********************************************************************************************************************************************************************/
+/****************************************************************************************
+																		GRAPH ITERATOR
+****************************************************************************************/
 
 template <typename vertex> weighted_graph<vertex>::graph_iterator::graph_iterator(const weighted_graph & g) {
 	
@@ -187,9 +202,9 @@ template <typename vertex> const vertex* weighted_graph<vertex>::graph_iterator:
 }
 
 
-/********************************************************************************************************************************************************************
-																NEIGHBOUR ITERATOR
-*********************************************************************************************************************************************************************/
+/****************************************************************************************
+																		NEIGHBOUR ITERATOR
+****************************************************************************************/
 
 template <typename vertex> weighted_graph<vertex>::neighbour_iterator::neighbour_iterator(const weighted_graph & g, const vertex& u) {
 		
@@ -251,9 +266,9 @@ template <typename vertex>	typename weighted_graph<vertex>::neighbour_iterator w
 	return neighbour_iterator(weighted_graph<vertex>(), vertex());
 }
 
-/********************************************************************************************************************************************************************
-																WEIGHTED GRAPH
-*********************************************************************************************************************************************************************/
+/****************************************************************************************
+																		WEIGHTED GRAPH
+****************************************************************************************/
 
 
 // DELETE AFTER LOL
@@ -278,7 +293,7 @@ template <typename vertex> void weighted_graph<vertex>::print() const {
 }
 
 /******************************
- Private Methods
+ 			 Private Methods
 *******************************/
 
 template <typename vertex> int weighted_graph<vertex>::get_index(const vertex& u) const {
@@ -299,7 +314,7 @@ template <typename vertex> bool weighted_graph<vertex>::index_are_valid(const in
 }
 
 /******************************
- Public Methods
+ 			 Public Methods
 *******************************/
 
 template <typename vertex> weighted_graph<vertex>::weighted_graph(){
@@ -313,7 +328,7 @@ template <typename vertex> weighted_graph<vertex>::~weighted_graph(){
 
 template <typename vertex> bool weighted_graph<vertex>::has_vertex(const vertex& u) const {
 	// for each vertex in vertices
-	for (auto v : vertices) {
+	for (vertex v : vertices) {
 		// if it is equal to the vertex we are looking for
 		if (v == u)
 			// return true, to signifiy it has been found
@@ -337,8 +352,8 @@ template <typename vertex> void weighted_graph<vertex>::add_vertex(const vertex&
 		// add new vertex to vertices list
 		vertices.push_back(v);
 		// add a new 0 value to the end of each row
-		for (unsigned i = 0 ; i < adj_matrix.size(); i++){
-			adj_matrix[i].push_back(0);
+		for (auto& row : adj_matrix){
+			row.push_back(0);
 		}	
 		// create a new vector row with default 0 values, and add it to the graph
 		adj_matrix.push_back(std::vector<int>(vertices.size(), 0));
@@ -396,7 +411,7 @@ template <typename vertex> void weighted_graph<vertex>::remove_edge(const vertex
 }
 
 template <typename vertex> void weighted_graph<vertex>::set_edge_weight(const vertex& u, const vertex& v, const int& weight) {
-	// get indexes of the verices
+	// get indexes of the vertices
 	int u_pos = get_index(u),
 			v_pos = get_index(v);
 	if(index_are_valid(u_pos, v_pos)) { 
@@ -548,13 +563,78 @@ template <typename vertex> std::vector<vertex> weighted_graph<vertex>::breadth_f
 	
 template <typename vertex>	weighted_graph<vertex> weighted_graph<vertex>::mst() {
 	weighted_graph<vertex> mst_graph;
-	
+	disjoint_set ds;
+	std::vector<edge> edges; 
+		
+	for (auto v : vertices) {
+			mst_graph.add_vertex(v);
+	}
 	// sorting algorithm, which iterates through the graph
-	
-	
-	
-	
+	for (unsigned i = 0; i < adj_matrix.size(); i++) {
+			for (unsigned j = i; j < adj_matrix.size(); j++) {
+					if (adj_matrix[i][j] > 0) {
+							edge e;
+							e.u_index = i;
+							e.v_index = j;
+							e.weight = adj_matrix[i][j];
+							edges.push_back(e);
+					}
+			}
+	}
+		
+	int edges_count = num_edges();
+	ds.make_set(edges_count);
+		
+	while (mst_graph.num_edges() != edges_count - 1) {
+		edge next_edge = edges.back();
+		edges.pop_back();
+			
+		int x = ds.find(next_edge.u_index);
+		int y = ds.find(next_edge.v_index);
+			
+		if (x != y) {
+			mst_graph.add_edge(
+				vertices[next_edge.u_index], 
+				vertices[next_edge.v_index], 
+				next_edge.weight
+			);
+		}
+	}
 	return mst_graph;
+}
+
+template <typename vertex>	void weighted_graph<vertex>::disjoint_set::make_set(int size) {
+		for (int i = 0; i < size; i++) {
+				parent[i] = i;
+		}
+}
+
+template <typename vertex>	int weighted_graph<vertex>::disjoint_set::find(int k) {
+		if (parent[k] == k)
+				return k;
+		return find(parent[k]);
+}
+
+template <typename vertex>	void weighted_graph<vertex>::disjoint_set::make_union(int u, int v) {
+		int x = find(u);
+		int y = find(v);
+		parent[x] = y;
+}
+
+template <typename vertex> void weighted_graph<vertex>::sort_edges(std::vector<edge>& edges) {
+		int max_index;    
+		for(unsigned int i = 0; i<edges.size()-1;i++){
+   			max_index = i;
+				for(unsigned int j = i+1; j<edges.size();j++)
+						if(edges[j].weight > edges[max_index].weight)
+								max_index = j;
+        // swap values
+        if( max_index != i ){
+					edge temp = edges[i];
+					edges[i] = edges[max_index];
+					edges[max_index] = temp;
+				}
+    }    
 }
 
 #endif
