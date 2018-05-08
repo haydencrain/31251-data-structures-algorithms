@@ -18,8 +18,6 @@
 #include <deque>
 #include <map>
 
-
-
 template <typename vertex>
 class weighted_graph {
 
@@ -31,7 +29,6 @@ class weighted_graph {
 	int weight_total;
 	
 	int get_index(const vertex&) const;
-	void reset_weights(const int&);
 	bool index_are_valid(const int&, const int&) const;
 	
 	//The graph_iterator class provides an iterator
@@ -285,22 +282,19 @@ template <typename vertex> void weighted_graph<vertex>::print() const {
 *******************************/
 
 template <typename vertex> int weighted_graph<vertex>::get_index(const vertex& u) const {
-	for (unsigned i = 0; i < num_vertices(); i++) {
-		if (vertices[i] == u) 
+	// for each vertex in vertices
+	for (unsigned i = 0; i < vertices.size(); i++) { 
+		// if is equal to the vertex we are looking for
+		if (vertices[i] == u)
+			// vertex has been found, and return the index of the vertex position
 			return i;
 	}
+	// else return "vertex does not exist" flag
 	return -1;
 }
 
-template <typename vertex> void weighted_graph<vertex>::reset_weights(const int& index) {
-	for(unsigned i = 0; i < num_vertices(); i++) {
-		adj_matrix[index][i] = adj_matrix[i][index] = 0;
-	}
-}
-
-
-
 template <typename vertex> bool weighted_graph<vertex>::index_are_valid(const int& u, const int& v) const {
+	// the two indexes must be greater than or equal to zero, and not equal each other.
 	return (u >= 0) && (v >= 0) && (u != v);
 }
 
@@ -309,65 +303,77 @@ template <typename vertex> bool weighted_graph<vertex>::index_are_valid(const in
 *******************************/
 
 template <typename vertex> weighted_graph<vertex>::weighted_graph(){
+	// reset edges and weight counts
 	edges_count = 0;
 	weight_total = 0;
 }
 
-template <typename vertex> weighted_graph<vertex>::~weighted_graph(){
-	
+template <typename vertex> weighted_graph<vertex>::~weighted_graph(){ 
 }
 
 template <typename vertex> bool weighted_graph<vertex>::has_vertex(const vertex& u) const {
+	// for each vertex in vertices
 	for (auto v : vertices) {
-		if (v == u) 
+		// if it is equal to the vertex we are looking for
+		if (v == u)
+			// return true, to signifiy it has been found
 			return true;
 	}
+	// else return false, to signify it has not been found
 	return false;
 }
 
 	
 template <typename vertex> bool weighted_graph<vertex>::are_adjacent(const vertex& u, const vertex& v) const {
+	// if vertices are valid, return whether or not it contains an edge, else return false
 	return (has_vertex(u) && has_vertex(v))
 		? adj_matrix[get_index(u)][get_index(v)] > 0
 		: false;
 }
 
 template <typename vertex> void weighted_graph<vertex>::add_vertex(const vertex& v) {
+	// if vertex does not exist
 	if(!has_vertex(v)) {
+		// add new vertex to vertices list
 		vertices.push_back(v);
-		// resize adj_matrix and set initial weights for new row/column
-		adj_matrix.resize(num_vertices());
-		for (unsigned i = 0; i < adj_matrix.size(); i++){
-			adj_matrix[i].resize(adj_matrix.size());
-		}
-		reset_weights(num_vertices()-1);
+		// add a new 0 value to the end of each row
+		for (unsigned i = 0 ; i < adj_matrix.size(); i++){
+			adj_matrix[i].push_back(0);
+		}	
+		// create a new vector row with default 0 values, and add it to the graph
+		adj_matrix.push_back(std::vector<int>(vertices.size(), 0));
 	}
 }
 
 template <typename vertex> void weighted_graph<vertex>::add_edge(const vertex& u, const vertex& v, const int& weight) {
+	// get the indexes of the two vertices
 	int u_pos = get_index(u),
-		v_pos = get_index(v);
-	if(index_are_valid(u_pos, v_pos)) { 
-		// if there's already an edge, don't add an edge
-		if (adj_matrix[u_pos][v_pos] == 0) { 
-			adj_matrix[u_pos][v_pos] = adj_matrix[v_pos][u_pos] = weight;
-			edges_count++;
-			weight_total += weight;
-		}
+			v_pos = get_index(v);
+	// if indexes are valid, and an edge does not exist, add an edge
+	if(index_are_valid(u_pos, v_pos) && adj_matrix[u_pos][v_pos] == 0) { 
+		// set the weight at the coordinates that correspond to the index
+		adj_matrix[u_pos][v_pos] = adj_matrix[v_pos][u_pos] = weight;
+		// increment edge count and weight total
+		edges_count++;
+		weight_total += weight;
 	}
 }
 	
 template <typename vertex> void weighted_graph<vertex>::remove_vertex(const vertex& u) {
+	// get index of vertex
 	int u_pos = get_index(u);
 	// if index is valid
 	if (u_pos >= 0) {
-		// remove edges and edge weights from total counts
+		// remove edges and edge weights from edge and weight count variables
 		for (unsigned i = 0; i < adj_matrix[u_pos].size(); i++) {
 			if (adj_matrix[u_pos][i] > 0) edges_count--;
 			weight_total -= adj_matrix[u_pos][i];
 		}
+		// remove vertex from vertex list
 		vertices.erase(vertices.begin() + u_pos);
+		// remove vertex row from adj_matrix
 		adj_matrix.erase(adj_matrix.begin() + u_pos);
+		// remove corresponding vertex values from each row
 		for (unsigned i = 0; i < adj_matrix.size(); i++) {
 			adj_matrix[i].erase(adj_matrix[i].begin() + u_pos);
 		}
@@ -376,43 +382,48 @@ template <typename vertex> void weighted_graph<vertex>::remove_vertex(const vert
 
 
 template <typename vertex> void weighted_graph<vertex>::remove_edge(const vertex& u, const vertex& v) {
+	// get indexes of the vertices
 	int u_pos = get_index(u),
-		v_pos = get_index(v);
+			v_pos = get_index(v);
 	if(index_are_valid(u_pos, v_pos)) { 
-		weight_total -= adj_matrix[u_pos][v_pos];
-		adj_matrix[u_pos][v_pos] = adj_matrix[v_pos][u_pos] = 0;
+		// decrease edge count and weight total
 		edges_count--;
+		weight_total -= adj_matrix[u_pos][v_pos];
+		// set weights correpsonding to the two indexes to 0
+		adj_matrix[u_pos][v_pos] = adj_matrix[v_pos][u_pos] = 0;
 		
 	}
 }
 
 template <typename vertex> void weighted_graph<vertex>::set_edge_weight(const vertex& u, const vertex& v, const int& weight) {
+	// get indexes of the verices
 	int u_pos = get_index(u),
-		v_pos = get_index(v);
+			v_pos = get_index(v);
 	if(index_are_valid(u_pos, v_pos)) { 
 		// if there isn't an edge already, we can't set the edge weight because it doesn't exist
-		if (adj_matrix[u_pos][v_pos] > 0 || u_pos == v_pos){
-			weight_total -= adj_matrix[u_pos][v_pos];
+		if (adj_matrix[u_pos][v_pos] > 0 || u_pos == v_pos) {
+			// the new weight total is equal to the difference between the new weight and old weight
+			weight_total += weight - adj_matrix[u_pos][v_pos];
+			// set the new weight to the coordinates representing the edge
 			adj_matrix[u_pos][v_pos] = adj_matrix[v_pos][u_pos] = weight;
-			edges_count++;
-			weight_total += weight;
-			
 		}
 	}
 }
 
 template <typename vertex> int weighted_graph<vertex>::get_edge_weight(const vertex& u, const vertex& v) const {
+	// if vertices are valid, return the weight, otherwise return 0
 	return (has_vertex(u) && has_vertex(v)) 
 		? adj_matrix[get_index(u)][get_index(v)] 
 		: 0; 
 }
 
 template <typename vertex> int weighted_graph<vertex>::degree(const vertex& u) const {
-	int u_pos = get_index(u);
 	int degree = 0;
+	int u_pos = get_index(u);
 	// if index is valid
 	if (u_pos >= 0) {
 		for (unsigned i = 0; i < adj_matrix[u_pos].size(); i++) {
+			// if the weight is greater than zero, increment degree by 1, otherwise increment by 0
 			degree += adj_matrix[u_pos][i] > 0 ? 1 : 0;
 		}
 	}
@@ -420,11 +431,12 @@ template <typename vertex> int weighted_graph<vertex>::degree(const vertex& u) c
 }
 
 template <typename vertex> int weighted_graph<vertex>::weighted_degree(const vertex& u) {
-	int u_pos = get_index(u);
 	int weighted_degree = 0;
+	int u_pos = get_index(u);
 	// if index is valid
 	if (u_pos >= 0) {
 		for (unsigned i = 0; i < adj_matrix[u_pos].size(); i++) {
+			// incrememnt the weighted_degree by the weight at the coordinate position
 			weighted_degree += adj_matrix[u_pos][i];
 		}
 	}
@@ -432,8 +444,8 @@ template <typename vertex> int weighted_graph<vertex>::weighted_degree(const ver
 }
 
 template <typename vertex> int weighted_graph<vertex>::num_vertices() const {
-	return vertices.size();
-}
+	return vertices.size(); // number of vertices is the size of the vertices array
+} 
 
 template <typename vertex> int weighted_graph<vertex>::num_edges() const {
 	return edges_count;
@@ -453,7 +465,9 @@ template <typename vertex>	std::vector<vertex> weighted_graph<vertex>::get_neigh
 	// if index is valid
 	if (u_pos >= 0) {
 		for (unsigned i = 0; i < adj_matrix[u_pos].size(); i++) {
+			// if the coordinate position contains an edge
 			if (adj_matrix[u_pos][i] > 0) 
+				// add it to the neigbours list
 				neighbours.push_back(vertices[i]);
 		}
 	}
@@ -464,28 +478,35 @@ template <typename vertex> std::vector<vertex> weighted_graph<vertex>::depth_fir
 	bool visited[vertices.size()];
 	std::stack<vertex> unprocessed;
 	std::vector<vertex> ordered;
-	
+	// if the index of the start_vertex is valid
 	if (get_index(start_vertex) >= 0) {
+		// set all index values to represent that they have not been visited yet 
 		for (unsigned i = 0; i < vertices.size(); i++){
 			visited[i] = false;
 		}
+		// push the start_vertex to the unprocessed vertices stack
 		unprocessed.push(start_vertex);
-		
+		// while there is still values in the unprocessed stack
 		while (!unprocessed.empty()){
-			int n = get_index(unprocessed.top());
+			// get the index of the top vertex and remove it from the stack	
+			int index = get_index(unprocessed.top());
 			unprocessed.pop();
-			if (!visited[n]){
-				visited[n] = true;
-				ordered.push_back(n);
+			// if it hasn't been visted yet
+			if (!visited[index]){
+				// set it to visited
+				visited[index] = true;
+				// add the vertex to the ordered list
+				ordered.push_back(vertices[index]);
 				for (unsigned i = vertices.size(); i != 0; i--){
-					if (adj_matrix[n][i-1]){
-						unprocessed.push(i-1);
+					// if the vertex contains a neighbour
+					if (adj_matrix[index][i-1] > 0){
+						// add the neighbour to the unprocessed stack
+						unprocessed.push(vertices[i-1]);
 					}
 				}
 			}
 		}
 	}
-	
 	return ordered;
 }
 
@@ -493,34 +514,47 @@ template <typename vertex> std::vector<vertex> weighted_graph<vertex>::breadth_f
 	bool visited[vertices.size()];
 	std::queue<vertex> unprocessed;
 	std::vector<vertex> ordered;
-	
+	// if the index of the start_vertex is valid
 	if (get_index(start_vertex) >= 0) {
+		// set all index values to represent that they have not been visited yet 
 		for (unsigned i = 0; i < vertices.size(); i++){
 			visited[i] = false;
 		}
+		// add the start_vertex to the unprocessed queue
 		unprocessed.push(start_vertex);
-		
+		// while there is still values in the unprocessed stack
 		while (!unprocessed.empty()){
-			int n = get_index(unprocessed.front());
+			// get the index of the vertex at the front of the queue and remove it
+			int index = get_index(unprocessed.front());
 			unprocessed.pop();
-			if (!visited[n]){
-				visited[n] = true;
-				ordered.push_back(n);
+			// if it hasn't been visited yet
+			if (!visited[index]){
+				// set it to visited
+				visited[index] = true;
+				// add the vertex to the ordered list
+				ordered.push_back(vertices[index]);
 				for (unsigned i = 0; i < vertices.size(); i++){
-					if (adj_matrix[n][i]){
-						unprocessed.push(i);
+					// if the vertex contains a neighbour
+					if (adj_matrix[index][i] > 0){
+						// add the neighbour to the end of the unprocessed queue.
+						unprocessed.push(vertices[i]);
 					}
 				}
 			}
 		}
 	}
-	
 	return ordered;
 }
 	
 template <typename vertex>	weighted_graph<vertex> weighted_graph<vertex>::mst() {
-	return weighted_graph<vertex>();
+	weighted_graph<vertex> mst_graph;
+	
+	// sorting algorithm, which iterates through the graph
+	
+	
+	
+	
+	return mst_graph;
 }
-
 
 #endif
