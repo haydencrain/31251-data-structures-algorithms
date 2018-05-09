@@ -1,6 +1,8 @@
 #ifndef WEIGHTED_GRAPH_H
 #define WEIGHTED_GRAPH_H
 
+#define INT_MAX 2147483647
+
 //A large selection of data structures from the standard
 //library. You need not feel compelled to use them all,
 //but as you can't add any, they're all here just in case.
@@ -29,23 +31,7 @@ private:
 	
 	int get_index(const vertex&) const;
 	bool index_are_valid(const int&, const int&) const;
-	
-	struct edge {
-		int u_index, v_index, weight;
-	};
-	
-	void sort_edges(std::vector<edge>&);
-	
-	class disjoint_set {
-	private:
-		std::unordered_map<int, int> parent;
-		
-	public:
-		void make_set(int); 
-		int find(int);
-		void make_union(int, int);
-	};
-	
+	int get_min_key(std::vector<int>, std::vector<bool>) const;
 	//The graph_iterator class provides an iterator
 	//over the vertices of the graph.
 	//This is one of the harder parts, so if you're
@@ -365,7 +351,7 @@ template <typename vertex> void weighted_graph<vertex>::add_edge(const vertex& u
 	int u_pos = get_index(u),
 			v_pos = get_index(v);
 	// if indexes are valid, and an edge does not exist, add an edge
-	if(index_are_valid(u_pos, v_pos) && adj_matrix[u_pos][v_pos] == 0) { 
+	if(index_are_valid(u_pos, v_pos) && adj_matrix[u_pos][v_pos] == 0 && weight > 0) { 
 		// set the weight at the coordinates that correspond to the index
 		adj_matrix[u_pos][v_pos] = adj_matrix[v_pos][u_pos] = weight;
 		// increment edge count and weight total
@@ -414,14 +400,12 @@ template <typename vertex> void weighted_graph<vertex>::set_edge_weight(const ve
 	// get indexes of the vertices
 	int u_pos = get_index(u),
 			v_pos = get_index(v);
-	if(index_are_valid(u_pos, v_pos)) { 
-		// if there isn't an edge already, we can't set the edge weight because it doesn't exist
-		if (adj_matrix[u_pos][v_pos] > 0 || u_pos == v_pos) {
-			// the new weight total is equal to the difference between the new weight and old weight
-			weight_total += weight - adj_matrix[u_pos][v_pos];
-			// set the new weight to the coordinates representing the edge
-			adj_matrix[u_pos][v_pos] = adj_matrix[v_pos][u_pos] = weight;
-		}
+	// if there isn't an edge already, we can't set the edge weight because it doesn't exist
+	if(index_are_valid(u_pos, v_pos) && adj_matrix[u_pos][v_pos] > 0 && weight > 0) { 
+		// the new weight total is equal to the difference between the new weight and old weight
+		weight_total += weight - adj_matrix[u_pos][v_pos];
+		// set the new weight to the coordinates representing the edge
+		adj_matrix[u_pos][v_pos] = adj_matrix[v_pos][u_pos] = weight;
 	}
 }
 
@@ -563,78 +547,52 @@ template <typename vertex> std::vector<vertex> weighted_graph<vertex>::breadth_f
 	
 template <typename vertex>	weighted_graph<vertex> weighted_graph<vertex>::mst() {
 	weighted_graph<vertex> mst_graph;
-	disjoint_set ds;
-	std::vector<edge> edges; 
+	std::vector<int> parent(vertices.size());
+	std::vector<int> key(vertices.size(), INT_MAX);
+	std::vector<bool> mst_set(vertices.size(), false);
+	
+	key[0] = 0;
+	parent[0] = -1;
+	
+	for (unsigned count = 0; count < vertices.size()-1; count++) {
+		int i = get_min_key(key, mst_set);
 		
-	for (auto v : vertices) {
-			mst_graph.add_vertex(v);
-	}
-	// sorting algorithm, which iterates through the graph
-	for (unsigned i = 0; i < adj_matrix.size(); i++) {
-			for (unsigned j = i; j < adj_matrix.size(); j++) {
-					if (adj_matrix[i][j] > 0) {
-							edge e;
-							e.u_index = i;
-							e.v_index = j;
-							e.weight = adj_matrix[i][j];
-							edges.push_back(e);
-					}
+		mst_set[i] = true;
+		
+		for(unsigned j = 0; j < vertices.size(); j++) {
+			if (adj_matrix[i][j] && !mst_set[j] && adj_matrix[i][j] < key[j]) {
+				parent[j] = i;
+				key[j] = adj_matrix[i][j];
 			}
-	}
-		
-	int edges_count = num_edges();
-	ds.make_set(edges_count);
-		
-	while (mst_graph.num_edges() != edges_count - 1) {
-		edge next_edge = edges.back();
-		edges.pop_back();
-			
-		int x = ds.find(next_edge.u_index);
-		int y = ds.find(next_edge.v_index);
-			
-		if (x != y) {
-			mst_graph.add_edge(
-				vertices[next_edge.u_index], 
-				vertices[next_edge.v_index], 
-				next_edge.weight
-			);
 		}
 	}
+	
+	for (unsigned i = 0; i < vertices.size(); i++) {
+		mst_graph.add_vertex(vertices[i]);
+	}
+	
+	for (unsigned i = 0; i < vertices.size(); ++i) {
+		mst_graph.add_edge(
+			vertices[parent[i]],
+			vertices[i],
+			adj_matrix[i][parent[i]]
+		);
+	}
+	
 	return mst_graph;
 }
 
-template <typename vertex>	void weighted_graph<vertex>::disjoint_set::make_set(int size) {
-		for (int i = 0; i < size; i++) {
-				parent[i] = i;
+template <typename vertex> int weighted_graph<vertex>::get_min_key(std::vector<int> key, std::vector<bool> mst_set) const {
+	int min = INT_MAX,
+			min_index;
+	
+	for (unsigned i = 0; i < vertices.size(); i++) {
+		if (!mst_set[i] && key[i] < min) {
+			min = key[i];
+			min_index = i;
 		}
-}
-
-template <typename vertex>	int weighted_graph<vertex>::disjoint_set::find(int k) {
-		if (parent[k] == k)
-				return k;
-		return find(parent[k]);
-}
-
-template <typename vertex>	void weighted_graph<vertex>::disjoint_set::make_union(int u, int v) {
-		int x = find(u);
-		int y = find(v);
-		parent[x] = y;
-}
-
-template <typename vertex> void weighted_graph<vertex>::sort_edges(std::vector<edge>& edges) {
-		int max_index;    
-		for(unsigned int i = 0; i<edges.size()-1;i++){
-   			max_index = i;
-				for(unsigned int j = i+1; j<edges.size();j++)
-						if(edges[j].weight > edges[max_index].weight)
-								max_index = j;
-        // swap values
-        if( max_index != i ){
-					edge temp = edges[i];
-					edges[i] = edges[max_index];
-					edges[max_index] = temp;
-				}
-    }    
+	}
+	return min_index;
 }
 
 #endif

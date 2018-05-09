@@ -1,3 +1,17 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <stack>
+#include <iostream>
+#include <unordered_set>
+#include <unordered_map>
+#include <set>
+#include <array>
+#include <list>
+#include <forward_list>
+#include <deque>
+#include <map>
+
 struct edge {
 		int u_index, v_index, weight;
 	};
