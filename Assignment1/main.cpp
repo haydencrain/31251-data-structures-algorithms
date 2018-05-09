@@ -3,19 +3,25 @@
 #include "weighted_graph.hpp"
 
 int main(){
-	weighted_graph<int> g;
-	int r = 5;
-	for (int i = 0; i < r; ++i)
-		g.add_vertex(i);
-	std::vector<int> vertices = g.get_vertices();
-	g.add_edge(0, 1, 1);
-	g.add_edge(1, 2, 2);
-	g.add_edge(2, 3, 3);
-	g.add_edge(3, 4, 4);
-	g.remove_vertex(0);
-	g.add_vertex(0);
-	g.add_edge(0, 4, 5);
+	weighted_graph<char> g;
+	g.add_vertex('a');
+	g.add_vertex('b');
+	g.add_vertex('c');
+	g.add_vertex('d');
+	g.add_vertex('e');
+		
+	g.add_edge('a', 'b', 1);
+	g.add_edge('a', 'b', 6);
+	g.add_edge('a', 'b', 1);
+	g.add_edge('a', 'e', 10);
+	g.add_edge('b', 'c', 2);
+	g.add_edge('c', 'd', 3);
+	g.add_edge('d', 'e', 4);
+	g.add_edge('d', 'f', 4);
 	g.print();
+	std::cout << std::endl;
+	weighted_graph<char> mst = g.mst();
+	mst.print();
 }
 
 
