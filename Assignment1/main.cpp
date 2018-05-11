@@ -22,6 +22,13 @@ int main(){
 	std::cout << std::endl;
 	weighted_graph<char> mst = g.mst();
 	mst.print();
+		
+	for (auto u : g.get_vertices()){
+
+			for (auto n = g.neighbours_begin(u); n != g.neighbours_end(u); ++n){
+				std::cout << (n->first) << ":" << (n->second) << " ";
+			}
+		}
 }
 
 

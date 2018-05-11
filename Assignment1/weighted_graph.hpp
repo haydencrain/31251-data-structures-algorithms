@@ -1,8 +1,6 @@
 #ifndef WEIGHTED_GRAPH_H
 #define WEIGHTED_GRAPH_H
 
-#define INT_MAX 2147483647
-
 //A large selection of data structures from the standard
 //library. You need not feel compelled to use them all,
 //but as you can't add any, they're all here just in case.
@@ -19,6 +17,7 @@
 #include <forward_list>
 #include <deque>
 #include <map>
+#include <limits>
 
 template <typename vertex>
 class weighted_graph {
@@ -41,8 +40,8 @@ private:
 	class graph_iterator {
 		
 	private:
-		
-	//You may need data members here.
+		weighted_graph<vertex> owner;
+		int position;
 				
 	public:
 		graph_iterator(const weighted_graph &);
@@ -65,10 +64,13 @@ private:
 			
 		private:
 		
-		//You may need data members here.
+		weighted_graph<vertex> owner;
+		int row_index;
+		int position;
+		bool is_valid_neighbour(int) const;
+		int get_next(int);
 				
 		public:
-			neighbour_iterator(const neighbour_iterator&);
 			neighbour_iterator(const weighted_graph &, const vertex&);
 			neighbour_iterator(const weighted_graph &, const vertex&, size_t);
 			~neighbour_iterator();
@@ -134,22 +136,14 @@ private:
 	
 };
 
-//Define all your methods down here (or move them up into the header, but be careful you don't double up).
-//Although these are just the same names copied from above, you may find a few more clues in the full
-//method headers. Note also that C++ is sensitive to the order you declare and define things in - you
-//have to have it available before you use it.
-
-
-/****************************************************************************************
-																		GRAPH ITERATOR
-****************************************************************************************/
-
 template <typename vertex> weighted_graph<vertex>::graph_iterator::graph_iterator(const weighted_graph & g) {
-	
+		owner = g;
+		position = 0;
 }
 
 template <typename vertex> weighted_graph<vertex>::graph_iterator::graph_iterator(const weighted_graph & g, size_t start_pos) {
-		
+		owner = g;
+		position = start_pos;
 }
 
 template <typename vertex> weighted_graph<vertex>::graph_iterator::~graph_iterator() {
@@ -157,34 +151,36 @@ template <typename vertex> weighted_graph<vertex>::graph_iterator::~graph_iterat
 }
 
 template <typename vertex> typename weighted_graph<vertex>::graph_iterator weighted_graph<vertex>::graph_iterator::operator=(const graph_iterator& it) { 
-		auto g = graph_iterator(weighted_graph<vertex>()); 
-		return g; 
+		this->position = it.position;
+		return this; 
 }
 
 template <typename vertex> bool weighted_graph<vertex>::graph_iterator::operator==(const graph_iterator& it) const { 
-		return false; 
+		return this->position == it.position; 
 }
 
 template <typename vertex> bool weighted_graph<vertex>::graph_iterator::operator!=(const graph_iterator& it) const { 
-		return false; 
+		return this->position != it.position; 
 }
 
 template <typename vertex> typename weighted_graph<vertex>::graph_iterator weighted_graph<vertex>::graph_iterator::operator++() { 
-		auto g = graph_iterator(weighted_graph<vertex>()); 
-		return g; 
+		position++;
+		return *this; 
 }
 
-template <typename vertex> typename weighted_graph<vertex>::graph_iterator weighted_graph<vertex>::graph_iterator::operator++(int) { 
-		auto g = graph_iterator(weighted_graph<vertex>()); 
-		return g; 
+template <typename vertex> typename weighted_graph<vertex>::graph_iterator weighted_graph<vertex>::graph_iterator::operator++(int) {
+		++position;
+		return *this; 
 }
 
 template <typename vertex> const vertex weighted_graph<vertex>::graph_iterator::operator*() { 
-		auto v = vertex(); return v; 
+		auto v = owner.vertices[position];
+		return v;
 }
 
 template <typename vertex> const vertex* weighted_graph<vertex>::graph_iterator::operator->() { 
-		return nullptr; 
+		auto v = owner.vertices[position]; 
+		return &v;
 }
 
 
@@ -192,12 +188,26 @@ template <typename vertex> const vertex* weighted_graph<vertex>::graph_iterator:
 																		NEIGHBOUR ITERATOR
 ****************************************************************************************/
 
+template <typename vertex> bool weighted_graph<vertex>::neighbour_iterator::is_valid_neighbour(int pos) const {
+		return !(owner.adj_matrix[row_index][pos] == 0 && pos < owner.adj_matrix[row_index].size());
+}
+
+template <typename vertex> int weighted_graph<vertex>::neighbour_iterator::get_next(int current_position) {
+		while(!is_valid_neighbour(current_position))
+				current_position++;
+		return current_position;
+}
+
 template <typename vertex> weighted_graph<vertex>::neighbour_iterator::neighbour_iterator(const weighted_graph & g, const vertex& u) {
-		
+		owner = g;
+		row_index = owner.get_index(u);
+		position = get_next(0);
 }
 
 template <typename vertex> weighted_graph<vertex>::neighbour_iterator::neighbour_iterator(const weighted_graph & g, const vertex& u, size_t start_pos) {
-		
+		owner = g; 
+		row_index = owner.get_index(u);
+		position = start_pos;
 }
 
 template <typename vertex> weighted_graph<vertex>::neighbour_iterator::~neighbour_iterator() {
@@ -205,51 +215,53 @@ template <typename vertex> weighted_graph<vertex>::neighbour_iterator::~neighbou
 }
 
 template <typename vertex> typename weighted_graph<vertex>::neighbour_iterator weighted_graph<vertex>::neighbour_iterator::operator=(const neighbour_iterator& it) { 
-		auto n = neighbour_iterator(weighted_graph<vertex>(), vertex()); 
-		return n; 
+		this->row_index = it.row_index; 
+		this->position = it.position;
+		return *this; 
 }
 
 template <typename vertex> bool weighted_graph<vertex>::neighbour_iterator::operator==(const neighbour_iterator& it) const { 
-		return false; 
+		return this->row_index == it.row_index && this->position == it.position; 
 }
 
 template <typename vertex> bool weighted_graph<vertex>::neighbour_iterator::operator!=(const neighbour_iterator& it) const { 
-		return false; 
+		return this->row_index != it.row_index && this->position != it.position; 
 }
 
 template <typename vertex> typename weighted_graph<vertex>::neighbour_iterator weighted_graph<vertex>::neighbour_iterator::operator++() { 
-		auto n = neighbour_iterator(weighted_graph<vertex>(), vertex()); 
-		return n; 
+		position = get_next(position + 1);
+		return *this; 
 }
 
 template <typename vertex> typename weighted_graph<vertex>::neighbour_iterator weighted_graph<vertex>::neighbour_iterator::operator++(int) { 
-		auto n = neighbour_iterator(weighted_graph<vertex>(), vertex()); 
-		return n; 
+		position = get_next(position + 1);
+		return *this;
 }
 
 template <typename vertex> const std::pair<vertex, int> weighted_graph<vertex>::neighbour_iterator::operator*() { 
-		auto p = std::pair<vertex,int>(); 
+		std::pair<vertex,int> p(owner.vertices[position], owner.adj_matrix[row_index][position]); 
 		return p; 
 }
 
 template <typename vertex> const std::pair<const vertex, int>* weighted_graph<vertex>::neighbour_iterator::operator->() { 
-		return nullptr; 
+		std::pair<const vertex,int> p(owner.vertices[position], owner.adj_matrix[row_index][position]); 
+		return &p; 
 }
 
 template <typename vertex>	typename weighted_graph<vertex>::graph_iterator weighted_graph<vertex>::begin() {
-	return graph_iterator(weighted_graph<vertex>());
+	return graph_iterator(*this);
 }
 
 template <typename vertex>	typename weighted_graph<vertex>::graph_iterator weighted_graph<vertex>::end() {
-	return graph_iterator(weighted_graph<vertex>());
+	return graph_iterator(*this, vertices.size());
 }
 	
 template <typename vertex>	typename weighted_graph<vertex>::neighbour_iterator weighted_graph<vertex>::neighbours_begin(const vertex& u) {
-	return neighbour_iterator(*this, vertex());
+	return neighbour_iterator(*this, u);
 }
 
 template <typename vertex>	typename weighted_graph<vertex>::neighbour_iterator weighted_graph<vertex>::neighbours_end(const vertex& u) {
-	return neighbour_iterator(weighted_graph<vertex>(), vertex());
+	return neighbour_iterator(weighted_graph<vertex>(), u, adj_matrix[get_index(u)].size());
 }
 
 /****************************************************************************************
@@ -548,7 +560,7 @@ template <typename vertex> std::vector<vertex> weighted_graph<vertex>::breadth_f
 template <typename vertex>	weighted_graph<vertex> weighted_graph<vertex>::mst() {
 	weighted_graph<vertex> mst_graph;
 	std::vector<int> parent(vertices.size());
-	std::vector<int> key(vertices.size(), INT_MAX);
+	std::vector<int> key(vertices.size(), std::numeric_limits<int>::max());
 	std::vector<bool> mst_set(vertices.size(), false);
 	
 	key[0] = 0;
@@ -583,7 +595,7 @@ template <typename vertex>	weighted_graph<vertex> weighted_graph<vertex>::mst() 
 }
 
 template <typename vertex> int weighted_graph<vertex>::get_min_key(std::vector<int> key, std::vector<bool> mst_set) const {
-	int min = INT_MAX,
+	int min = std::numeric_limits<int>::max(),
 			min_index;
 	
 	for (unsigned i = 0; i < vertices.size(); i++) {
