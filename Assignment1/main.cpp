@@ -2,7 +2,8 @@
 #include <vector>
 #include "weighted_graph.hpp"
 
-int main(){
+int main()
+{
 	weighted_graph<char> g;
 	g.add_vertex('a');
 	g.add_vertex('b');
@@ -20,8 +21,16 @@ int main(){
 	g.add_edge('d', 'f', 4);
 	g.print();
 	std::cout << std::endl;
+		std::cout << g.degree('a');
+		std::cout << std::endl;
 	weighted_graph<char> mst = g.mst();
 	mst.print();
+		
+	for (auto v = g.begin(); v != g.end(); ++v) {
+			std::cout << (*v) << " "; 
+	}
+		
+	std::cout << std::endl;
 		
 	for (auto u : g.get_vertices()){
 
@@ -30,5 +39,3 @@ int main(){
 			}
 		}
 }
-
-
