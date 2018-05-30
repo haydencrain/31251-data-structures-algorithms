@@ -21,8 +21,8 @@
 //Returns true if the graph is connected, false otherwise.
 template <typename vertex>
 bool is_connected(const weighted_graph<vertex>& g){
-	auto g_it = g.cbegin();
-	if (g.num_vertices() == 0 || depth_first(g, *(g_it)).size() == g.num_vertices()) 
+	// if the graph is empty, of if a depth first traversal returns every vertex in the graph
+	if (g.num_vertices() == 0 || depth_first(g, *(g.cbegin())).size() == g.num_vertices()) 
 		return true;
 	return false;
 }
@@ -63,16 +63,18 @@ std::vector<weighted_graph<vertex>> connected_components(const weighted_graph<ve
 template <typename vertex> 
 vertex min_distance(const std::map<vertex, int>& dijkstras, const std::unordered_set<vertex>& spt_set, const weighted_graph<vertex>& g) {
 	vertex min_vertex;
+	// set to max int value
 	int min = std::numeric_limits<int>::max();
-	
+	// for each vertex
 	for (auto g_it = g.cbegin(); g_it != g.cend(); ++g_it) {
-		vertex this_vertex = *g_it;
-		if (spt_set.count(this_vertex) == 0 && dijkstras.at(this_vertex) <= min) {
-			min = dijkstras.at(this_vertex); 
-			min_vertex = this_vertex;
+		vertex v = *g_it;
+		// if it is not apart of the spt_set yet, and it is less than the current distance
+		if (spt_set.count(v) == 0 && dijkstras.at(v) <= min) {
+			// set the vertex as the current minimum
+			min = dijkstras.at(v); 
+			min_vertex = v;
 		}
 	}
-	
 	return min_vertex;
 }
 
@@ -121,13 +123,25 @@ std::map<vertex, int> dijkstras(const weighted_graph<vertex>& g, const vertex& v
 //input weighted graph g.
 template <typename vertex>
 std::vector<vertex> articulation_points(const weighted_graph<vertex>& g){
-	std::vector<vertex> articulation_points;	
+	std::vector<vertex> articulation_points;
+	// make a copy of the graph to test with
+	weighted_graph<vertex> test_graph;
+	// if empty graph, return empty articulation point vector
+	if (g.num_vertices() == 0) return articulation_points;
 	
 	// simple, but n^2 time complexity approach:
 	for (auto g_it = g.cbegin(); g_it != g.cend(); ++g_it) {
-		vertex v = *g_it;	
+		// reset the test graph
+		test_graph = g;
+		vertex v = *g_it;
+		// remove the vertex from the graph
+		test_graph.remove_vertex(v);
+		// if the graph is no longer connected
+		if (!is_connected(test_graph)) {
+			// the vertex is an articulation point
+			articulation_points.push_back(v);
+		}
 	}
-	
 	return articulation_points;
 }
 
