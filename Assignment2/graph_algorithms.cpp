@@ -20,6 +20,7 @@
 
 template <typename vertex>
 bool is_empty(const weighted_graph<vertex>& g) {
+	// graph is empty if no vertices exist
 	return g.num_vertices() == 0;
 }
 
@@ -63,6 +64,7 @@ std::vector<weighted_graph<vertex>> connected_components(const weighted_graph<ve
 	return components;
 }
 
+// Uses a linear search to return the next vertex with the minimum distance from a set of vertices not yet processed.
 template <typename vertex> 
 vertex min_distance(const std::map<vertex, int>& dijkstras, const std::unordered_set<vertex>& spt_set, const weighted_graph<vertex>& g) {
 	vertex min_vertex;
@@ -80,7 +82,6 @@ vertex min_distance(const std::map<vertex, int>& dijkstras, const std::unordered
 	}
 	return min_vertex;
 }
-
 
 // Returns a map of the vertices of the weighted graph g and their distances from
 // the given starting vertex v.
@@ -125,7 +126,7 @@ std::map<vertex, int> dijkstras(const weighted_graph<vertex>& g, const vertex& v
 template <typename vertex>
 std::vector<vertex> articulation_points(const weighted_graph<vertex>& g){
 	std::vector<vertex> articulation_points;
-	weighted_graph<vertex> test_graph; // Make a copy of the graph to test with
+	weighted_graph<vertex> test_graph; // Make a copy of the graph to test with.
 	// Simple, but O(n^2) time complexity approach. 
 	// It also assumes the the graph is intially connected.
 	for (auto g_it = g.cbegin(); g_it != g.cend(); ++g_it) {
