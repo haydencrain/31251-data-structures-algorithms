@@ -20,14 +20,14 @@
 
 template <typename vertex>
 bool is_empty(const weighted_graph<vertex>& g) {
-	// graph is empty if no vertices exist
+	// Graph is empty if no vertices exist
 	return g.num_vertices() == 0;
 }
 
 // Returns true if the graph is connected, false otherwise.
 template <typename vertex>
 bool is_connected(const weighted_graph<vertex>& g){
-	// Return true if the graph is empty, of if a depth first traversal returns every vertex in the graph
+	// Return true if the graph is empty, or if a depth first traversal returns every vertex in the graph
 	return is_empty(g) || depth_first(g, *(g.cbegin())).size() == g.num_vertices();
 }
 
@@ -37,26 +37,24 @@ template <typename vertex>
 std::vector<weighted_graph<vertex>> connected_components(const weighted_graph<vertex>& g){
 	std::vector<weighted_graph<vertex> > components;
 	std::unordered_set<vertex> visited;
-	int index; // keeps track of the most recent graph that has been added to the vector
 	// For each vertex
 	for (auto g_it = g.cbegin(); g_it != g.cend(); ++g_it) {
 		vertex u = *g_it;
-		// 1 Pick an unvisited vertex.
+		// Pick an unvisited vertex
 		if (visited.count(u) == 0) {
-			// 2 Start a traversal there.
+			// Start a traversal at the vertex. All the vertices reached from there form a component
 			auto vertices = depth_first(g, u);
-			// 3 All the vertices you can reach from there form a component,
+			// Create a new connected component graph
 			components.push_back(weighted_graph<vertex>());
-			index = components.size() - 1;
-			// Record this and mark them as visisted.
+			// Mark all vertices as visited and add them to the graph
 			for (auto v : vertices) {
-				components.at(index).add_vertex(v);
+				components.back().add_vertex(v);
 				visited.insert(v);
 			}
-			// Rebuild each of the vertices' edges
+			// Rebuild all of the vertices' edges
 			for (auto v : vertices) {
 				for (auto n_it = g.cneighbours_begin(v); n_it != g.cneighbours_end(v); ++n_it) {
-					components.at(index).add_edge(v, n_it->first, n_it->second);
+					components.back().add_edge(v, n_it->first, n_it->second);
 				}
 			}
 		}
@@ -66,7 +64,7 @@ std::vector<weighted_graph<vertex>> connected_components(const weighted_graph<ve
 
 // Uses a linear search to return the next vertex with the minimum distance from a set of vertices not yet processed.
 template <typename vertex> 
-vertex min_distance(const std::map<vertex, int>& dijkstras, const std::unordered_set<vertex>& spt_set, const weighted_graph<vertex>& g) {
+vertex min_distance(const weighted_graph<vertex>& g, const std::map<vertex, int>& dijkstras, const std::unordered_set<vertex>& spt_set) {
 	vertex min_vertex;
 	// Set to max int value
 	int min = std::numeric_limits<int>::max();
@@ -101,13 +99,13 @@ std::map<vertex, int> dijkstras(const weighted_graph<vertex>& g, const vertex& v
   // Find shortest path for all vertices
 	for (auto g_it1 = g.cbegin(); g_it1 != g.cend(); ++g_it1) {
 		// Pick the minimum distance vertex from the set of vertices not yet processed.
-		vertex u = min_distance(dijkstras, spt_set, g);
+		vertex u = min_distance(g, dijkstras, spt_set);
 		// Mark the picked vertex as processed
 		spt_set.insert(u);
 		// update the distance value of the adjacent vertices of the picked vertex
 		for (auto g_it2 = g.cbegin(); g_it2 != g.cend(); ++g_it2) {
 			vertex v = *g_it2;
-			// update only if it is not yet in the shortest path tree set, if there is an edge from u to the iterator vertex, 
+			// Update only if it is not yet in the shortest path tree set, if there is an edge from u to the iterator vertex, 
 			// and the total weight between the two is smaller than the current value stored.
 			if (spt_set.count(v) == 0
 				&& g.are_adjacent(u, v)
@@ -128,7 +126,6 @@ std::vector<vertex> articulation_points(const weighted_graph<vertex>& g){
 	std::vector<vertex> articulation_points;
 	weighted_graph<vertex> test_graph; // Make a copy of the graph to test with.
 	// Simple, but O(n^2) time complexity approach. 
-	// It also assumes the the graph is intially connected.
 	for (auto g_it = g.cbegin(); g_it != g.cend(); ++g_it) {
 		// Reset the test graph
 		test_graph = g;
