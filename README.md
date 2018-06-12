@@ -158,6 +158,10 @@ class node {
 ```
 ## Iterators
 **CPP REFERENCES**
+## Asymptotic Notations
+- **O (Big-Oh) Notation:** The upper bound of an algorithm
+- **Θ (Theta) Notation:** Bounds a function from above and below, defines exact asymptotic behaviou
+- **Ω (Omega) Notation:** Asymptotic lower bound
 ## Big-Oh Notation
 Comparing two functions f and g:
 
@@ -177,3 +181,5 @@ Count the number of steps
 ### Other Properties
 
 ![](https://i.gyazo.com/fb076668f27d6330bceee0570649eaf6.png)
+
+# Week 4 - Divide and Conquer, Recursion, Iteration
