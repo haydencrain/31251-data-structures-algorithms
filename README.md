@@ -25,6 +25,7 @@ int a[4];
 - Arrays can be treated as pointers e.g. `int[] = int*`
 ## Pointers
 - A pointer is an object that refers to another object
+
 ![px = &x](https://gyazo.com/85b731ecf986c7087c77bc0d5563798b.png)
 ```C++
 double* px; // initialise a pointer
