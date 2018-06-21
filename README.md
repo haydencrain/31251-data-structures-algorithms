@@ -1,29 +1,44 @@
-# Week 1 - Strings, Arrays, Pointers, Classes
+
+# Week 1 - Introduction and Simple C++ Concepts
+## What is an Algorithm
+An algorithm is:
+- a well defined computational process that takes some **input** and produces and **output**
+## What is a Data Structure
+A data structure is a way to store and organise data. It can also be seen as a special type of algorithm.
 ## Strings
-- In C – Null terminated char arrays
-- C++ has a proper string class (`std::string`) that acts as a wrapper for `char[]`
-- C++11, null_ptr type exists, before that pointers were either just 0, or something that looks like it
-## Static and Dynamic Allocation
-- Things can be statically allocated: 
-	- They are automatically deallocated when they go out of scope. 
-	- What does this mean for return data? 
-- Or dynamically allocated: 
-	- Created on the heap with the `new` keyword. 
-	- C++ has no garbage collection, so you have to manage it yourself. 
-- Don’t use `new` unless you mean it!
+Strings in C are *null terminated* char arrays. In C++ however, there is an added implementation of a proper string class (`std::string`) that acts as a wrapper for `char[]`, as well as fixing issues when dealing with null termination
+### Null Pointers
+In C++ a null value is actually just 0 (or something that looks like it)
+Since C++11 an actual null_ptr type exists, which means you're able to have a proper null (similar to C) that isn't just 0.
+## Memory Allocation
+[*] NB: C++ Standard does not specify where to allocate dynamic or static memory
+### Static Allocation
+Declaring a static variable is usually placed onto the stack (usually*). 
+The variable will *die* at the end of the code block in which it is defined (they will be automatically deallocated).
+### Dynamic Allocation
+Dynamically allocating a variable will be usually placed onto the heap (usually*).
+C++ does not contain any garbage collection, which means the variable will no longer be automatically deallocated, and you will have to decide where to deallocate it using the `delete` keyword.
+- BIG MUST: The `delete` MUST be used if you dynamically allocate memory.
+```C++
+int* arr = new int[5];
+[...]
+delete[] arr; // delete[] is used for arrays
+```
 ## Arrays
+Arrays in C++ are very similar to Java arrays:
 ```C++
 int a[4] = {1,2,3,4};
 int a[] = {1,2,3,4};
 int a[4] = {};
 int a[4];
 ```
-- Arrays are statically created
-- We also need to declare a size. (Which is bad most of the time).
-- `std::vector` helps with this.
+Arrays are statically created, which means they will automatically deallocate once out of scope.
+However, one thing to note is that C++ arrays need a **size to be declared**. If we don't know the size of the array to use, we can use a pointer:
 - Arrays can be treated as pointers e.g. `int[] = int*`
+- Technical jargon: Arrays decay to pointers to the first element of the array. 
+
 ## Pointers
-- A pointer is an object that refers to another object
+A pointer is an object that refers to another object
 
 ![px = &x](https://gyazo.com/85b731ecf986c7087c77bc0d5563798b.png)
 ```C++
@@ -31,14 +46,17 @@ double* px; // initialise a pointer
 double x = 5.1234
 px = &x;   // setting a pointer to the memory address of an object
 *px; // obtains the value pointed to by the pointer (dereferencing)
-(*px).bar = px->bar // arrow notation can be used to access 
+(*px).bar = px->bar // arrow notation can be used to access a member
 ```
 ## References
-- A reference variable is used to give a name to an object. It refers to the same object. 
+A reference variable is used to give a name to an object. It refers to the same object.
+For Example:
 ```C++
-int& rx = x; // references x, so if you change the value in rx, it also changes x
+int& rx = x;
 ```
-- Useful for when passing a value into a function by reference
+- the reference variable `rx` references `x`, which means that if you change the value of `rx`, it will also change the value of `x`.
+
+Using references is extremely useful for when passing a value into a function by reference:
 ```C++
 void do_something_cool(int& x) {
 	x = x + 1;
@@ -183,3 +201,8 @@ Count the number of steps
 ![](https://i.gyazo.com/fb076668f27d6330bceee0570649eaf6.png)
 
 # Week 4 - Divide and Conquer, Recursion, Iteration
+## Divide and Conquer
+The general framework for a divide-and-conquer algorithm is:
+1. Divide the instance into a set of sub-problems
+2. If a subproblem is small enough, solve it, otherwise recursively split the subproblem
+3. Combine the subproblem solutions into a whole solution.
